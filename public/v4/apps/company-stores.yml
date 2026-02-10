@@ -1,0 +1,143 @@
+captainVersion: 4
+caproverOneClickApp:
+    instructions:
+        start: |-
+            Company Stores (Solidus) with PostgreSQL.
+
+            This deploys the Solidus e-commerce platform with a dedicated PostgreSQL database.
+        end: |-
+            Your Company Stores (Solidus) app is now deployed.
+
+            **Access:**
+            - Admin: https://$$cap_appname.$$cap_root_domain/admin/login
+
+            See https://guides.solidus.io/ for documentation.
+    displayName: Company Stores (Solidus + PostgreSQL)
+    isOfficial: false
+    description: Solidus e-commerce platform with bundled PostgreSQL.
+
+    variables:
+        - id: $$cap_app_image
+          label: App Image
+          defaultValue: 'company_stores:1.0.0'
+          description: Docker image for the app (e.g. company_stores:1.0.0 or registry.example.com/solidus:latest)
+          validRegex: /^.+$/
+        - id: $$cap_postgres_version
+          label: PostgreSQL Version
+          defaultValue: '17.7'
+          description: PostgreSQL image tag (e.g. 17.7, 17). See https://hub.docker.com/_/postgres/tags for available tags.
+          validRegex: /^([^\s\/])+$/
+        - id: $$cap_db_user
+          label: Database User
+          defaultValue: solidus
+          description: PostgreSQL username (used by app and DB)
+          validRegex: /^([a-zA-Z0-9_])+$/
+        - id: $$cap_db_password
+          label: Database Password
+          defaultValue: $$cap_gen_random_hex(16)
+          description: PostgreSQL password (auto-generated if left default)
+          validRegex: /.{1,}/
+        - id: $$cap_db_name
+          label: Database Name
+          defaultValue: company_stores
+          description: PostgreSQL database name
+          validRegex: /^([a-zA-Z0-9_])+$/
+        - id: $$cap_rails_master_key
+          label: Rails Master Key
+          defaultValue: 'b729bcb387334e7c278a7db13c9149fd'
+          description: Rails master key for encrypted credentials
+          validRegex: /.{1,}/
+        - id: $$cap_solid_queue_in_puma
+          label: Solid Queue in Puma
+          defaultValue: 'true'
+          description: Run Solid Queue inside Puma (true/false)
+          validRegex: /^(true|false)$/
+        - id: $$cap_smtp_address
+          label: SMTP Address
+          defaultValue: ''
+          description: SMTP server host (leave empty to disable)
+          validRegex: /.*/
+        - id: $$cap_smtp_port
+          label: SMTP Port
+          defaultValue: '1025'
+          description: SMTP port (e.g. 1025, 587)
+          validRegex: /^[0-9]+$/
+        - id: $$cap_smtp_username
+          label: SMTP Username
+          defaultValue: ''
+          description: SMTP username (optional)
+          validRegex: /.*/
+        - id: $$cap_smtp_password
+          label: SMTP Password
+          defaultValue: ''
+          description: SMTP password (optional)
+          validRegex: /.*/
+        - id: $$cap_smtp_domain
+          label: SMTP Domain
+          defaultValue: ''
+          description: SMTP domain (e.g. your domain for mail)
+          validRegex: /.*/
+        - id: $$cap_smtp_authentication
+          label: SMTP Authentication
+          defaultValue: plain
+          description: SMTP auth method (plain, login, etc.)
+          validRegex: /^([a-zA-Z0-9_])+$/
+        - id: $$cap_mailer_host
+          label: Mailer Host
+          defaultValue: ''
+          description: Host used in mailer URLs (e.g. yourstore.com)
+          validRegex: /.*/
+        - id: $$cap_rails_log_level
+          label: Rails Log Level
+          defaultValue: info
+          description: Rails log level (debug, info, warn, error, fatal)
+          validRegex: /^(debug|info|warn|error|fatal)$/
+        - id: $$cap_assume_ssl
+          label: Assume SSL
+          defaultValue: 'true'
+          description: Assume HTTPS (true/false)
+          validRegex: /^(true|false)$/
+        - id: $$cap_force_ssl
+          label: Force SSL
+          defaultValue: 'true'
+          description: Force HTTPS (true/false)
+          validRegex: /^(true|false)$/
+
+services:
+    $$cap_appname-db:
+        image: postgres:$$cap_postgres_version
+        restart: always
+        environment:
+            POSTGRES_USER: $$cap_db_user
+            POSTGRES_PASSWORD: $$cap_db_password
+            POSTGRES_DB: $$cap_db_name
+        volumes:
+            - $$cap_appname-db-data:/var/lib/postgresql/data
+        caproverExtra:
+            notExposeAsWebApp: 'true'
+
+    $$cap_appname:
+        image: $$cap_app_image
+        restart: always
+        depends_on:
+            - $$cap_appname-db
+        environment:
+            DATABASE_URL: postgres://$$cap_db_user:$$cap_db_password@srv-captain--$$cap_appname-db:5432/$$cap_db_name
+            RAILS_MASTER_KEY: $$cap_rails_master_key
+            RAILS_DEVELOPMENT_HOSTS: '.$$cap_root_domain,$$cap_appname.$$cap_root_domain'
+            SOLID_QUEUE_IN_PUMA: $$cap_solid_queue_in_puma
+            SMTP_ADDRESS: $$cap_smtp_address
+            SMTP_PORT: $$cap_smtp_port
+            SMTP_USERNAME: $$cap_smtp_username
+            SMTP_PASSWORD: $$cap_smtp_password
+            SMTP_DOMAIN: $$cap_smtp_domain
+            SMTP_AUTHENTICATION: $$cap_smtp_authentication
+            MAILER_HOST: $$cap_mailer_host
+            RAILS_LOG_LEVEL: $$cap_rails_log_level
+            ASSUME_SSL: $$cap_assume_ssl
+            FORCE_SSL: $$cap_force_ssl
+        caproverExtra:
+            containerHttpPort: '3000'
+            websocketSupport: 'false'
+        volumes:
+            - $$cap_appname-storage:/rails/storage
