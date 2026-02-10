@@ -2,7 +2,7 @@ name: Publish One Click Apps
 
 on:
     push:
-        branches: [master]
+        branches: [main]
 
 jobs:
     build:
@@ -14,4 +14,4 @@ jobs:
                   node-version: 20
             - run: npm ci && npm run publish
               env:
-                  GITHUB_PERSONAL_TOKEN: ${{secrets.GITHUB_PERSONAL_TOKEN}}
+                  GITHUB_PERSONAL_TOKEN: ${{secrets.GH_TOKEN}}
