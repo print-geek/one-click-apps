@@ -1,1 +1,1 @@
-{"oneClickApps":[{"name":"company-stores","displayName":"Company Stores (Solidus + PostgreSQL)","description":"Solidus e-commerce platform with bundled PostgreSQL.","isOfficial":false,"logoUrl":"company-stores.png"}]}
+{"oneClickApps":[{"name":"company-stores","displayName":"Company Stores (Solidus + PostgreSQL)","description":"Company Stores e-commerce platform (Solidus + Solid Queue) with bundled PostgreSQL and a dedicated job worker.","isOfficial":false,"logoUrl":"company-stores.png"}]}
