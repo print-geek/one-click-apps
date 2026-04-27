@@ -31,8 +31,8 @@ caproverOneClickApp:
     variables:
         - id: $$cap_app_image
           label: App Image
-          defaultValue: 'company_stores:latest'
-          description: Docker image for the app. Pin to a specific tag for production (e.g. company_stores:1.2.0) instead of :latest.
+          defaultValue: 'company_stores:3.0.0'
+          description: Docker image for the app.
           validRegex: /^.+$/
         - id: $$cap_postgres_version
           label: PostgreSQL Version
